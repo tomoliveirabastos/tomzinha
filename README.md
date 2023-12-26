@@ -27,3 +27,7 @@
 ### sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list http://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
 ### sudo apt update
 ### sudo apt install vulkan-sdk
+
+
+## Docker Rabbitmq
+#### docker run -d --name rabbitmq -p 15671:15671 -p 15672:15672 -p 15691:15691 -p 15692:15692 -p 25672:25672 -p 4369:4369 -p 5671:5671 -p 5672:5672 -e RABBITMQ_DEFAULT_PASS=123Mudar -e RABBITMQ_DEFAULT_USER=admin rabbitmq:management-alpine
