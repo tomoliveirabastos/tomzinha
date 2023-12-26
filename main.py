@@ -1,11 +1,9 @@
+import publisher
 import vosk
-import threading
 import pyfirmata2 as  firmata
 import pyaudio
-import pyttsx3
 import json
 import queue
-
 
 q = queue.Queue()
 
@@ -15,6 +13,7 @@ j = json.loads(content)
 
 def ligarFn(frase: str):
        words = ["liga", "ligar"]
+       
        for word in words:
               if word == frase.strip():
                      return True
@@ -39,44 +38,39 @@ def worker1():
        recognizer = vosk.KaldiRecognizer(model, 16000) 
        LED_pin = board.get_pin("d:7:o")  # Initialize the pin (d => digital, 13 => Number of the pin, o => output)
 
-       q.put("Olá, eu sou a Tomzinha")
-
        while True:
               try:
                      data = stream.read(4096)
                      if recognizer.AcceptWaveform(data):
                             text = recognizer.Result()
                             t = text[14:-3]
-                            print(t)
                             
+                            print(t)
+                            obj = {
+                                   "message": t
+                            }
+                                                 
                             if t.strip() != "":
+                            
                                    if ligarFn(t):
+                                          obj["gpt"] = "NAO"
+                                          obj["message"] = "Comando de ligar foi acionado!"
                                           LED_pin.write(False)
-                                          q.put("O comando de ligar foi acionado.")
                                           
                                    elif desligarFn(t):
+                                          obj["gpt"] = "NAO"
+                                          obj["message"] = "Comando de desligar foi acionado!"
                                           LED_pin.write(True)
-                                          q.put("O comando de desligar foi acionado.")
 
                                    else:
-                                          q.put("Eu não entendi o comando, pode repetir ?")
+                                          obj["gpt"] = "SIM"
+                                   
+                                   print(obj)
+                                   aa = json.dumps(obj)
+                                   publisher.send_message(aa)
                                    
               except Exception as err:
                      q.put("Ocorreu um erro inesperado, o sistema foi reiniciado")
                      print(err)
-                     
-def worker2():
-       engine = pyttsx3.init()
-       
-       while True:
-              a = q.get()
-              engine.say(a)
-              engine.runAndWait()
 
-q.join()
-
-t1 = threading.Thread(target=worker1)
-t2 = threading.Thread(target=worker2)
-
-t1.start()
-t2.start()
+worker1()

@@ -2,3 +2,4 @@ venv
 env.json
 voices/*
 __pycache__
+gpt4all
